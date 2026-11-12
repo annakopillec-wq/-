@@ -67,10 +67,13 @@ h3{font-size:15px;margin:0;font-weight:700}
 .num{font-variant-numeric:tabular-nums}
 
 /* hero */
-.hero{display:grid;grid-template-columns:170px 1fr;gap:18px;align-items:center}
+.hero{display:grid;grid-template-columns:220px 1fr;gap:18px;align-items:center}
 @media (max-width:560px){.hero{grid-template-columns:1fr;justify-items:center;text-align:center}.hero .stats{width:100%;text-align:left}}
-.hero svg{width:170px;height:auto;max-width:100%}
-input.hname{font-size:26px;font-weight:800;letter-spacing:-.03em;border:0;background:none;padding:0;width:100%;text-align:inherit}
+.hero svg{width:220px;height:auto;max-width:100%;border-radius:18px;display:block}
+.goal{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:center}
+.goal img{width:160px;aspect-ratio:4/5;object-fit:cover;border-radius:14px;display:block;max-width:100%}
+@media (max-width:560px){.goal{grid-template-columns:110px 1fr}.goal img{width:110px}}
+input.hname[type=text]{font-size:26px;font-weight:800;letter-spacing:-.03em;border:0;background:none;padding:0;width:100%;text-align:inherit}
 .lvl{display:inline-flex;gap:8px;align-items:center;font-weight:700;font-size:13px;background:var(--surface-2);border-radius:999px;padding:4px 10px}
 .lvl b{background:var(--xp);color:#2A1C00;border-radius:999px;padding:1px 8px}
 .bar{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
@@ -184,10 +187,11 @@ const MEDIA = {book:"Книга", series:"Сериал", film:"Фильм"};
 const MSTATUS = {want:"Хочу", doing:"В процессе", done:"Готово", sell:"Продать"};
 const TAGS = {work:"Работа", call:"Созвон", body:"Тело", joy:"Досуг", home:"Быт", prep:"ЧП"};
 const GEAR = [
-  ["body",2,"Кроссовки"],["body",3,"Повязка"],["body",5,"Гантель"],
-  ["work",2,"Телефон-камера"],["work",4,"Значок автора"],
-  ["joy",2,"Книга"],["joy",4,"Наушники"],
-  ["prep",2,"Рюкзак"],["prep",3,"Фонарик"],
+  ["body",2,"Кожаный корсет"],["body",3,"Ремни с пряжками"],["body",5,"Кинжал"],
+  ["work",2,"Руны на руке"],["work",4,"Руна на шее"],["work",6,"Руны на обеих руках"],
+  ["joy",2,"Серебряные серьги"],["joy",4,"Светящийся кулон"],
+  ["prep",2,"Колчан со стрелами"],["prep",3,"Лук"],
+  ["hero",3,"Собор за спиной"],["hero",5,"Огни в окнах"],["hero",7,"Небесная руна"],
 ];
 
 // ---------- dates ----------
@@ -205,7 +209,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 
 function defaults(){
   return {
-    v:1, updated:0, heroName:"Герой", start: mondayOf(today()),
+    v:1, updated:0, heroName:"Моя героиня", start: mondayOf(today()),
     targets:{steps6:7, steps10:3, gym:3, post:3, story:5, ads:2, read:5, sudoku:3},
     log:{}, weight:[], goalKg:null,
     media:[],
@@ -241,6 +245,7 @@ function normalize(s){
   const o = Object.assign(d, s || {});
   o.targets = Object.assign(defaults().targets, (s && s.targets) || {});
   for (const k of ["weight","media","chores","choreLog","prep","notes"]) if (!Array.isArray(o[k])) o[k] = [];
+  if (o.heroName === "Герой") o.heroName = "Моя героиня";
   if (!o.log || typeof o.log !== "object") o.log = {};
   return o;
 }
@@ -264,7 +269,7 @@ function xp(){
   x.total = x.work + x.body + x.joy + x.prep + x.home;
   return x;
 }
-const TITLES = ["Новичок","Путник","Исследователь","Мастер ритма","Хранитель","Легенда"];
+const TITLES = ["Ученица","Следопыт","Охотница","Страж","Воительница","Легенда"];
 const title = n => TITLES[Math.min(TITLES.length-1, Math.floor((n-1)/2))];
 
 // ---------- persistence ----------
@@ -345,37 +350,66 @@ function choreState(c){
 }
 const sortedWeight = () => [...S.weight].sort((a,b) => a.d.localeCompare(b.d));
 
-// ---------- hero svg (original character) ----------
+// ---------- hero svg (original huntress character, evolves with stats) ----------
+function rune(x, y, s, glow){
+  const d = `M${x} ${y} C${x+2*s} ${y+5*s} ${x-2*s} ${y+10*s} ${x} ${y+16*s} M${x} ${y+4*s} L${x+5*s} ${y} M${x} ${y+8*s} L${x-5*s} ${y+4*s} M${x} ${y+12*s} L${x+5*s} ${y+16*s}`;
+  return (glow ? `<path d="${d}" stroke="#9fd8ff" stroke-width="${3.6*s}" opacity=".35" fill="none" stroke-linecap="round"/>` : "") +
+    `<path d="${d}" stroke="#20160f" stroke-width="${1.7*s}" fill="none" stroke-linecap="round" opacity=".9"/>`;
+}
 function heroSVG(lv){
-  const L = s => lv[s].n;
-  const shirt = "var(--prep)";
-  const parts = [];
-  parts.push(`<ellipse cx="80" cy="170" rx="44" ry="7" fill="var(--line)"/>`);
-  if (L("prep") >= 2) parts.push(`<rect x="44" y="92" width="72" height="54" rx="18" fill="var(--hair)" opacity=".55"/>`);
-  // legs + shoes
-  parts.push(`<rect x="62" y="136" width="14" height="28" rx="6" fill="var(--ink)" opacity=".85"/><rect x="84" y="136" width="14" height="28" rx="6" fill="var(--ink)" opacity=".85"/>`);
-  const shoe = L("body") >= 2 ? "var(--body)" : "var(--muted)";
-  parts.push(`<rect x="56" y="160" width="22" height="9" rx="4.5" fill="${shoe}"/><rect x="82" y="160" width="22" height="9" rx="4.5" fill="${shoe}"/>`);
+  const L = s => lv[s].n, H = lv.hero.n;
+  const skin = "#C99A78", skinSh = "#A97C5E", hair = "#2A1B15", hairHi = "#6B4330", leather = "#141418", silver = "#C9CED6";
+  const p = [];
+  p.push(`<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A4252"/><stop offset=".55" stop-color="#20252F"/><stop offset="1" stop-color="#0E1015"/></linearGradient>
+    <radialGradient id="fog" cx=".5" cy="1" r=".7"><stop offset="0" stop-color="#8C95A6" stop-opacity=".35"/><stop offset="1" stop-color="#8C95A6" stop-opacity="0"/></radialGradient>
+    <clipPath id="frame"><rect width="200" height="260" rx="18"/></clipPath></defs><g clip-path="url(#frame)">`);
+  p.push(`<rect width="200" height="260" fill="url(#sky)"/>`);
+  p.push(`<ellipse cx="50" cy="30" rx="60" ry="14" fill="#9AA3B3" opacity=".12"/><ellipse cx="160" cy="50" rx="55" ry="12" fill="#9AA3B3" opacity=".1"/>`);
+  if (H >= 7) p.push(`<g transform="translate(38 26)"><circle r="16" fill="#E8EEF7" opacity=".08"/>${rune(0,-9,1.1,true)}</g>`);
+  if (H >= 3) {
+    p.push(`<path d="M138 260 L138 120 L146 112 L152 60 L158 112 L166 120 L166 92 L172 84 L177 40 L182 84 L188 92 L188 260Z" fill="#0B0D13" opacity=".92"/>`);
+    p.push(`<path d="M0 260 L0 70 L10 60 L18 18 L26 60 L34 70 L34 130 L44 124 L44 260Z" fill="#0B0D13" opacity=".85"/>`);
+    if (H >= 5) p.push(`<g fill="#F2C46A" opacity=".85"><rect x="148" y="130" width="3" height="7" rx="1.5"/><rect x="156" y="130" width="3" height="7" rx="1.5"/><rect x="175" y="104" width="3" height="7" rx="1.5"/><rect x="175" y="150" width="3" height="7" rx="1.5"/><rect x="15" y="84" width="3" height="7" rx="1.5"/><rect x="22" y="110" width="3" height="7" rx="1.5"/></g>`);
+  }
+  p.push(`<rect y="180" width="200" height="80" fill="url(#fog)"/>`);
+  // bow and quiver behind
+  if (L("prep") >= 3) p.push(`<path d="M156 66 Q192 156 154 252" stroke="#3B2A1E" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M156 66 L154 252" stroke="#B9B2A4" stroke-width=".8"/>`);
+  if (L("prep") >= 2) {
+    p.push(`<g transform="rotate(-16 52 120)"><rect x="40" y="78" width="22" height="96" rx="6" fill="#1D1A18"/><rect x="40" y="96" width="22" height="4" fill="#3B302A"/>`);
+    for (let i = 0; i < 4; i++) { const x = 44 + i*5; p.push(`<line x1="${x}" y1="80" x2="${x}" y2="${44 + (i%2)*6}" stroke="#2B2B2E" stroke-width="1.6"/><path d="M${x} ${44+(i%2)*6} l-3 10 3 -3 3 3z" fill="#3C3C42"/>`); }
+    p.push(`</g>`);
+  }
+  // hair (back mass)
+  p.push(`<path d="M100 34 C70 34 56 58 58 88 C60 122 44 150 48 190 C50 216 40 236 46 262 L154 262 C160 236 150 216 152 190 C156 150 140 122 142 88 C144 58 130 34 100 34Z" fill="${hair}"/>`);
+  if (H >= 4) p.push(`<path d="M60 92 C58 130 48 160 52 200 M140 92 C142 130 152 160 148 200" stroke="${hairHi}" stroke-width="2" fill="none" opacity=".7"/>`);
+  // neck, arms
+  p.push(`<rect x="90" y="86" width="20" height="32" rx="8" fill="${skin}"/><path d="M90 98 Q100 106 110 98 L110 104 Q100 110 90 104Z" fill="${skinSh}" opacity=".5"/>`);
+  p.push(`<path d="M72 112 C58 116 54 136 54 162 C54 192 56 218 58 262 L74 262 C72 218 72 188 75 160Z" fill="${skin}"/>`);
+  p.push(`<path d="M128 112 C142 116 146 136 146 162 C146 192 144 218 142 262 L126 262 C128 218 128 188 125 160Z" fill="${skin}"/>`);
+  if (L("work") >= 2) p.push(rune(64, 136, 1, true) + rune(62, 178, 1.1, true));
+  if (L("work") >= 6) p.push(rune(136, 150, 1, true) + rune(138, 196, 1, true));
   // torso
-  parts.push(`<rect x="52" y="90" width="56" height="54" rx="20" fill="${shirt}"/>`);
-  if (L("prep") >= 2) parts.push(`<path d="M62 92 L66 140 M98 92 L94 140" stroke="var(--hair)" stroke-width="4" stroke-linecap="round"/>`);
-  if (L("prep") >= 3) parts.push(`<rect x="88" y="128" width="16" height="8" rx="3" fill="var(--xp)"/>`);
-  if (L("work") >= 4) parts.push(`<circle cx="70" cy="108" r="5" fill="var(--work)"/><path d="M70 104 l1.4 2.8 3 .4 -2.2 2 .6 3 -2.8-1.5 -2.8 1.5 .6-3 -2.2-2 3-.4z" fill="#fff"/>`);
-  // arms
-  parts.push(`<rect x="38" y="96" width="14" height="38" rx="7" fill="var(--skin)"/><rect x="108" y="96" width="14" height="38" rx="7" fill="var(--skin)"/>`);
-  if (L("work") >= 2) parts.push(`<rect x="28" y="122" width="14" height="22" rx="3" fill="var(--ink)"/><circle cx="35" cy="127" r="2.4" fill="var(--work)"/>`);
-  if (L("body") >= 5) parts.push(`<rect x="111" y="136" width="8" height="18" rx="2" fill="var(--muted)"/><rect x="106" y="132" width="18" height="6" rx="3" fill="var(--ink)"/><rect x="106" y="152" width="18" height="6" rx="3" fill="var(--ink)"/>`);
-  if (L("joy") >= 2) parts.push(`<rect x="96" y="104" width="24" height="18" rx="3" fill="var(--joy)" transform="rotate(-12 108 113)"/><path d="M98 108 h18" stroke="#fff" stroke-width="1.5" transform="rotate(-12 108 113)"/>`);
+  const top = L("body") >= 2 ? leather : "#474C57";
+  p.push(`<path d="M74 112 L92 112 L100 134 L108 112 L126 112 L129 160 Q126 205 122 262 L78 262 Q74 205 71 160Z" fill="${top}"/>`);
+  if (L("body") >= 2) p.push(`<path d="M88 140 Q86 190 88 210 M112 140 Q114 190 112 210" stroke="#2E2E36" stroke-width="1.2" fill="none"/><path d="M80 150 Q84 140 92 138" stroke="#4A4A55" stroke-width="2" fill="none" opacity=".7"/>`);
+  if (L("prep") >= 2) p.push(`<path d="M80 112 L126 214" stroke="#0A0A0C" stroke-width="6"/><rect x="96" y="145" width="9" height="11" rx="1.5" fill="none" stroke="${silver}" stroke-width="1.6" transform="rotate(-24 100 150)"/>`);
+  if (L("body") >= 3) p.push(`<rect x="72" y="214" width="56" height="8" fill="#0A0A0C"/><rect x="94" y="212" width="11" height="12" rx="1.5" fill="none" stroke="${silver}" stroke-width="1.6"/><path d="M73 236 L127 228 L127 235 L73 243Z" fill="#0A0A0C"/><rect x="104" y="229" width="9" height="10" rx="1.5" fill="none" stroke="${silver}" stroke-width="1.4" transform="rotate(-8 108 234)"/>`);
+  if (L("body") >= 5) p.push(`<g transform="rotate(-28 118 240)"><rect x="114" y="222" width="7" height="26" rx="3" fill="#2A2A30"/><rect x="109" y="246" width="17" height="4" rx="2" fill="${silver}"/><circle cx="117.5" cy="220" r="4" fill="${silver}"/></g>`);
+  if (L("joy") >= 4) p.push(`<path d="M90 106 Q100 126 110 106" stroke="${silver}" stroke-width="1" fill="none"/><circle cx="100" cy="122" r="5" fill="#F5C25A" opacity=".35"/><circle cx="100" cy="122" r="2.6" fill="#F5D58A"/>`);
+  if (L("work") >= 4) p.push(rune(106, 92, .8, true));
   // head
-  parts.push(`<circle cx="80" cy="58" r="30" fill="var(--skin)"/>`);
-  parts.push(`<path d="M50 56 C50 30 72 22 84 24 C102 26 112 40 110 58 C104 46 94 40 80 40 C68 40 56 46 50 56Z" fill="var(--hair)"/>`);
-  if (L("body") >= 3) parts.push(`<rect x="50" y="42" width="60" height="7" rx="3.5" fill="var(--body)"/>`);
-  if (L("joy") >= 4) parts.push(`<path d="M48 60 C48 26 112 26 112 60" stroke="var(--ink)" stroke-width="4" fill="none"/><rect x="42" y="54" width="10" height="16" rx="4" fill="var(--joy)"/><rect x="108" y="54" width="10" height="16" rx="4" fill="var(--joy)"/>`);
-  parts.push(`<circle cx="70" cy="62" r="3.2" fill="var(--ink)"/><circle cx="90" cy="62" r="3.2" fill="var(--ink)"/>`);
-  parts.push(`<circle cx="64" cy="70" r="4" fill="var(--work)" opacity=".25"/><circle cx="96" cy="70" r="4" fill="var(--work)" opacity=".25"/>`);
-  parts.push(`<path d="M72 72 Q80 79 88 72" stroke="var(--ink)" stroke-width="2.4" fill="none" stroke-linecap="round"/>`);
-  if (lv.hero.n >= 5) parts.push(`<path d="M80 6 l4 8 9 1.2 -6.5 6 1.6 8.8 -8.1-4.3 -8.1 4.3 1.6-8.8 -6.5-6 9-1.2z" fill="var(--xp)"/>`);
-  return `<svg viewBox="0 0 160 180" role="img" aria-label="Персонаж, уровень ${lv.hero.n}">${parts.join("")}</svg>`;
+  p.push(`<ellipse cx="100" cy="64" rx="22" ry="27" fill="${skin}"/>`);
+  p.push(`<path d="M85 56 Q91 52 97 56 M103 56 Q109 52 115 56" stroke="${hair}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`);
+  p.push(`<path d="M86 63 Q91 58.5 96 63 Q91 66 86 63Z M104 63 Q109 58.5 114 63 Q109 66 104 63Z" fill="#1A120E"/><circle cx="92" cy="62.4" r=".8" fill="#fff" opacity=".8"/><circle cx="110" cy="62.4" r=".8" fill="#fff" opacity=".8"/>`);
+  p.push(`<path d="M100 64 L98 75 Q100 77 103 76" stroke="${skinSh}" stroke-width="1.4" fill="none" stroke-linecap="round"/>`);
+  p.push(`<path d="M93 82 Q100 79 107 82 Q100 88 93 82Z" fill="#94524C"/>`);
+  // hair front
+  p.push(`<path d="M77 62 C76 40 90 30 102 31 C117 32 126 44 124 66 C120 52 110 42 98 43 C90 44 82 50 77 62Z" fill="${hair}"/>`);
+  p.push(`<path d="M80 50 C70 66 70 92 72 116 C74 146 64 172 70 206 L78 204 C74 172 82 146 80 116 C78 90 82 66 88 54Z" fill="${hair}"/>`);
+  p.push(`<path d="M120 50 C132 66 132 96 132 120 C132 150 140 176 134 210 L126 206 C130 176 124 150 124 120 C124 94 122 68 114 54Z" fill="${hair}"/>`);
+  if (L("joy") >= 2) p.push(`<circle cx="78" cy="72" r="1.6" fill="${silver}"/><path d="M78 74 l-2 5 2 2 2 -2z" fill="${silver}"/><circle cx="122" cy="72" r="1.6" fill="${silver}"/><path d="M122 74 l-2 5 2 2 2 -2z" fill="${silver}"/>`);
+  p.push(`</g>`);
+  return `<svg viewBox="0 0 200 260" role="img" aria-label="Охотница, уровень ${H}">${p.join("")}</svg>`;
 }
 
 // ---------- views ----------
@@ -393,7 +427,9 @@ function vHero(){
   const dueChores = S.chores.map(c => ({c, st: choreState(c)})).filter(o => o.st.due <= 0).sort((a,b) => a.st.due - b.st.due);
   const prepDone = S.prep.filter(p => p.done).length;
   const calls = S.notes.filter(n => n.tag === "call" && !n.done);
-  const gear = GEAR.map(([s, n, name]) => `<span class="${lv[s].n >= n ? "on" : ""}" style="--c:var(--${s});--soft:var(--${s}-soft)">${lv[s].n >= n ? "" : "🔒 "}${name}${lv[s].n >= n ? "" : ` · ${STATS[s].short} ${n}`}</span>`).join("");
+  const gotGear = GEAR.filter(([s, n]) => lv[s].n >= n).length;
+  const nextGear = GEAR.filter(([s, n]) => lv[s].n < n).sort((a,b) => (a[1]-lv[a[0]].n) - (b[1]-lv[b[0]].n))[0];
+  const gear = GEAR.map(([s, n, name]) => `<span class="${lv[s].n >= n ? "on" : ""}" style="--c:var(--${s});--soft:var(--${s}-soft)">${lv[s].n >= n ? "" : "🔒 "}${name}${lv[s].n >= n ? "" : ` · ${s==="hero"?"Общий":STATS[s].short} ${n}`}</span>`).join("");
   return `
   <section class="panel">
     <div class="hero">
@@ -406,6 +442,19 @@ function vHero(){
       </div>
     </div>
     <div><div class="label" style="margin-bottom:6px">Снаряжение</div><div class="gear">${gear}</div></div>
+  </section>
+
+  <section class="panel">
+    <div class="goal">
+      <img src="goal.webp" alt="Образ цели: охотница в чёрной коже с колчаном у готического собора">
+      <div class="stack" style="gap:8px;min-width:0">
+        <div class="label">Образ цели</div>
+        <h2>Финальная форма</h2>
+        <p class="sub" style="margin:0">Каждый элемент образа открывается реальными делами: корсет и ремни дают тренировки, руны дают работа и контент, колчан и лук дают запас на случай ЧП.</p>
+        <div class="bar"><span style="width:${gotGear/GEAR.length*100}%"></span></div>
+        <div class="sub num">Собрано ${gotGear} из ${GEAR.length}${nextGear ? ` · следующее: ${nextGear[2]} (${nextGear[0]==="hero"?"общий":STATS[nextGear[0]].short.toLowerCase()} ур. ${nextGear[1]})` : ""}</div>
+      </div>
+    </div>
   </section>
 
   <section class="panel">
@@ -646,7 +695,7 @@ document.addEventListener("change", e => {
   const el = e.target;
   if (el.dataset.act === "mstatus") { const m = S.media.find(x => x.id === el.dataset.id); m.status = el.value; commit(el.value==="done" ? "+10 XP · Радость" : null); }
   if (el.dataset.act === "every") { const c = S.chores.find(x => x.id === el.dataset.id); c.every = Math.max(1, Math.min(60, +el.value || 1)); commit(); }
-  if (el.id === "heroName") { S.heroName = el.value.trim() || "Герой"; commit(); }
+  if (el.id === "heroName") { S.heroName = el.value.trim() || "Моя героиня"; commit(); }
 });
 document.addEventListener("submit", e => {
   e.preventDefault();
