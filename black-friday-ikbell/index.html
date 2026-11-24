@@ -809,7 +809,7 @@
 
   /* Salón */
   .about{background:linear-gradient(135deg,var(--bf-black) 0%,#1c1c1e 100%);color:#fff;}
-  .about-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:36px;align-items:center;}
+  .about-grid{display:block;max-width:760px;}
   .about-logo{border-radius:20px;border:1px solid rgba(232,57,46,.35);box-shadow:0 20px 50px rgba(0,0,0,.4);
     background:radial-gradient(circle at 50% 40%,rgba(232,57,46,.22),transparent 65%),#111;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;padding:30px;}
   .about-logo img{width:88%;filter:invert(1);mix-blend-mode:screen;}
@@ -839,16 +839,15 @@
     .hero-sticker{width:84px;height:84px;font-size:26px;right:12%;}
     .benefits{grid-template-columns:1fr;}
     .about-grid{grid-template-columns:1fr;}
-    .about-logo{max-width:360px;margin:0 auto;aspect-ratio:1;}
   }
   @media(max-width:720px){
     .hero{padding:112px 0 0;}
-    .hero-grid{display:grid;grid-template-columns:1fr 44%;gap:0;align-items:stretch;text-align:left;}
-    .hero-text{padding-bottom:26px;position:relative;z-index:3;}
+    .hero-grid{display:block;position:relative;text-align:left;}
+    .hero-text{padding:6px 0 30px;position:relative;z-index:3;max-width:64%;}
     .hero-kicker{font-size:10.5px;letter-spacing:1px;margin-bottom:6px;}
     .hero-title{line-height:.92;margin-bottom:10px;}
     .hero-title span{display:block;font-size:54px;}
-    .hero-sub{font-size:12.5px;margin-bottom:10px;line-height:1.4;}
+    .hero-sub{font-size:13px;margin-bottom:12px;line-height:1.4;color:rgba(255,255,255,.85);}
     .hero-price-row{justify-content:flex-start;gap:8px;margin-bottom:14px;}
     .hero-price{font-size:46px;}
     .hero-price-old{font-size:15px;}
@@ -857,9 +856,10 @@
     .hero-guarantee{display:none;}
     .hero-guarantee::before{display:none;}
     .hero-note{font-size:10.5px;}
-    .hero-photo{margin-right:-24px;min-height:300px;}
-    .hero-photo img{object-position:58% top;-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 30%);mask-image:linear-gradient(to right,transparent 0%,#000 30%);}
-    .hero-sticker{width:64px;height:64px;font-size:19px;top:2%;right:8%;}
+    .hero-photo{position:absolute;top:0;bottom:0;right:-24px;width:66%;min-height:0;z-index:1;}
+    .hero-photo::before{display:none;}
+    .hero-photo img{object-position:62% 12%;opacity:.85;-webkit-mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.5) 35%,#000 70%),linear-gradient(to bottom,#000 70%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.5) 35%,#000 70%),linear-gradient(to bottom,#000 70%,transparent 100%);mask-composite:intersect;}
+    .hero-sticker{display:none;}
     .hero-sticker small{font-size:7px;}
     .nav-actions .btn{display:none;}
     .logo-mark{width:38px;height:38px;}
@@ -868,7 +868,15 @@
     .stat{min-width:0;}
     .stat b{font-size:24px;}
     .stats{gap:8px;flex-wrap:nowrap;}
-    .goals{grid-template-columns:1fr;}
+    .section-sub{font-size:14px;margin-bottom:14px;}
+    h2.section-title{font-size:26px;margin-bottom:10px;}
+    .benefits{gap:10px;}
+    .benefit{display:grid;grid-template-columns:34px 1fr;column-gap:12px;padding:14px 16px;}
+    .benefit i{width:34px;height:34px;margin:0;grid-row:span 2;}
+    .benefit h4{font-size:13.5px;margin-bottom:2px;}
+    .benefit p{font-size:13px;line-height:1.45;}
+    .price-card{padding:16px 18px;gap:10px;}
+    .places{margin-top:12px;}
   }
 </style>
 </head>
@@ -974,51 +982,12 @@
   <div class="container">
     <h2 class="section-title reveal">¿Qué conseguirás con Body Endosphères?</h2>
     <p class="section-sub reveal">Tratamiento Total Body de última generación: trabaja todo el cuerpo, de los pies al cuello y de los glúteos a los brazos, gracias a la Microvibración Compresiva.</p>
-    <div class="goals">
-      <div class="goal reveal">
-        <img src="" data-img="img/Rimodella-adi.jpeg" alt="Remodelar la adiposidad" loading="lazy">
-        <div class="goal-body">
-          <h3>Remodelar la <span>adiposidad</span></h3>
-          <p>Actúa sobre la grasa localizada difícil de eliminar —brazos, espalda, cintura, abdomen y piernas— sin cirugía y adaptándose a tu piel.</p>
-          <a class="btn btn-outline wa-link" href="#" target="_blank" rel="noopener">Quiero una sesión</a>
-        </div>
-      </div>
-      <div class="goal reveal">
-        <img src="" data-img="img/leviga-cellulite.jpeg" alt="Alisar la celulitis" loading="lazy">
-        <div class="goal-body">
-          <h3>Alisar la <span>celulitis</span></h3>
-          <p>Afecta a 9 de cada 10 mujeres. Sus cinco acciones sinérgicas actúan sobre las causas, reducen la piel de naranja y alisan los tejidos.</p>
-          <a class="btn btn-outline wa-link" href="#" target="_blank" rel="noopener">Quiero una sesión</a>
-        </div>
-      </div>
-      <div class="goal reveal">
-        <img src="" data-img="img/Circolazione-sanguigna_ok.jpeg" alt="Piernas ligeras" loading="lazy">
-        <div class="goal-body">
-          <h3>Piernas <span>ligeras</span></h3>
-          <p>Reactiva la circulación y estimula en profundidad el sistema linfático: adiós a la pesadez de piernas, tobillos y pies.</p>
-          <a class="btn btn-outline wa-link" href="#" target="_blank" rel="noopener">Quiero una sesión</a>
-        </div>
-      </div>
-      <div class="goal reveal">
-        <img src="" data-img="img/Tonificare-corpo.jpeg" alt="Tonificar la piel" loading="lazy">
-        <div class="goal-body">
-          <h3>Tonificar la <span>piel</span></h3>
-          <p>Diseñada para trabajar la flacidez en glúteos, piernas y brazos —también tras una pérdida de peso— con resultados notables en firmeza.</p>
-          <a class="btn btn-outline wa-link" href="#" target="_blank" rel="noopener">Quiero una sesión</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== VENTAJAS ===== -->
-<section style="padding-top:0;">
-  <div class="container">
     <div class="benefits">
       <div class="benefit reveal"><i>1</i><h4>Clínicamente probada</h4><p>Resultados demostrados por diferentes universidades e institutos médicos.</p></div>
       <div class="benefit reveal"><i>2</i><h4>Perfecta sin cirugía</h4><p>Remodela tu figura sin necesidad de cirugía estética.</p></div>
       <div class="benefit reveal"><i>3</i><h4>Eficaz y segura</h4><p>Terapia no invasiva y sin dolor, sin efectos secundarios.</p></div>
     </div>
+    <div style="text-align:center;margin-top:22px;"><a href="#precios" class="btn btn-primary">Quiero una sesión</a></div>
   </div>
 </section>
 
@@ -1064,7 +1033,6 @@
 <!-- ===== EL SALÓN ===== -->
 <section class="about" id="salon">
   <div class="container about-grid">
-    <div class="about-logo reveal"><img src="" data-img="img/ik/logo.png" alt="Logotipo del salón Ik Bell" loading="lazy"></div>
     <div class="reveal">
       <h2 class="section-title">Salón Ik Bell</h2>
       <p class="about-role">Body Endosphères Therapy en Benidorm</p>
@@ -1075,11 +1043,6 @@
         <li>Garantía: si no ves resultados, te devolvemos el dinero</li>
         <li>En pleno centro: Avda. Villajoyosa, 12, Benidorm</li>
       </ul>
-      <h5>Más ventajas de Body Endosphères</h5>
-      <div class="chips">
-        <span>Prevención del envejecimiento</span><span>Tratamiento de cicatrices</span><span>Síndrome hombro-cuello</span>
-        <span>Estimulación plantar</span><span>Preparación atlética</span><span>Rehabilitación postraumática</span><span>Drenaje linfático</span>
-      </div>
       <a href="#precios" class="btn btn-primary">Quiero mi descuento</a>
     </div>
   </div>
